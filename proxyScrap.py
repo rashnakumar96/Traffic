@@ -4,6 +4,7 @@ from itertools import cycle
 import traceback
 import traffic
 import urllib2
+import smtplib
 
 def get_proxies():
     url = 'https://free-proxy-list.net/'
@@ -34,7 +35,32 @@ while True:
             traffic.traffic(proxy)
         except KeyboardInterrupt:
             raise KeyboardInterrupt
-        except:
+        except requests.exceptions.ProxyError:
             #Most free proxies will often get connection errors. You will have retry the entire request using another proxy to work. 
-            #We will just skip retries as its beyond the scope of this tutorial and we are only downloading a single url 
+            #We will just skip retries as its beyond the scope of this tutorial and we are only downloading a single url         
             print("Skipping. Connnection error")
+        except requests.exceptions.ConnectionError:
+            continue
+        except Exception,e:
+            server = smtplib.SMTP('smtp.gmail.com:587')
+            server.ehlo()
+            server.starttls()
+            server.login('ddar203@gmail.com','Rockbottom_5')
+            msg1 = "\r\n".join([
+              "From: ddar203@gmail.com",
+              "To: rashna_kumar@ymail.com",
+              "Subject: Code Crashed",
+              str(e),
+              "Why, oh why"
+              ])
+            msg2 = "\r\n".join([
+              "From: ddar203@gmail.com",
+              "To: ddar203@gmail.com",
+              "Subject: Code Crashed",
+              "",
+              str(e)+"\nWhy, oh why"
+              ])
+            server.sendmail('ddar203@gmail.com',"rashna_kumar@ymail.com",msg1)
+            server.sendmail('ddar203@gmail.com','ddar203@gmail.com',msg2)
+            server.quit()
+
