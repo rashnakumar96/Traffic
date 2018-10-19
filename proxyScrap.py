@@ -3,6 +3,7 @@ import requests
 from itertools import cycle
 import traceback
 import traffic
+import random
 import urllib2
 import smtplib
 
@@ -10,28 +11,33 @@ def get_proxies():
     url = 'https://free-proxy-list.net/'
     response = requests.get(url)
     parser = fromstring(response.text)
-    proxies = set()
+    proxies = []
     for i in parser.xpath('//tbody/tr'):
         if i.xpath('.//td[5][contains(text(),"elite proxy")]'):
             proxy = ":".join([i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
-            proxies.add(proxy)
+            proxies.append(proxy)
     return proxies
 
 
 #If you are copy pasting proxy ips, put in the list below
 
-url = 'https://httpbin.org/ip'
+# url = 'https://httpbin.org/ip'
 
 while True:
     proxies = get_proxies()
-    proxy_pool = cycle(proxies)
+    # proxy_pool = cycle(proxies)
+    w = []
     for i in range(len(proxies)):
         #Get a proxy from the pool
-        proxy = next(proxy_pool)
+        r = random.randint(0,len(proxies))
+        proxy = proxies[r]
+        while proxies[r] in w:
+          r = random.randint(0,len(proxies))
+          proxy = proxies[r]
+        w.append(proxies[r])
         print("Request #%d"%i)
+        print proxy
         try:
-            response = requests.get(url,proxies={"http": proxy, "https": proxy})
-            print(response.json())
             traffic.traffic(proxy)
         except KeyboardInterrupt:
             raise KeyboardInterrupt
@@ -45,22 +51,22 @@ while True:
             server = smtplib.SMTP('smtp.gmail.com:587')
             server.ehlo()
             server.starttls()
-            server.login('ddar203@gmail.com','Rockbottom_5')
+            server.login('codeguardian1@gmail.com','traffic_notifier')
             msg1 = "\r\n".join([
-              "From: ddar203@gmail.com",
+              "From: Code Guardian",
               "To: rashna_kumar@ymail.com",
               "Subject: Code Crashed",
-              str(e),
+              "",
               "Why, oh why"
               ])
             msg2 = "\r\n".join([
-              "From: ddar203@gmail.com",
+              "From: Code Guardian",
               "To: ddar203@gmail.com",
               "Subject: Code Crashed",
               "",
-              str(e)+"\nWhy, oh why"
+              "\nWhy, oh why"
               ])
-            server.sendmail('ddar203@gmail.com',"rashna_kumar@ymail.com",msg1)
-            server.sendmail('ddar203@gmail.com','ddar203@gmail.com',msg2)
+            server.sendmail('codeguardian1@gmail.com',"rashna_kumar@ymail.com",msg1)
+            server.sendmail('codeguardian1@gmail.com','ddar203@gmail.com',msg2)
             server.quit()
-
+            raise KeyboardInterrupt
